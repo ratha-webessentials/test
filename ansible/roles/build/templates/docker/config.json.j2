@@ -1,0 +1,7 @@
+{
+	"auths": {
+		"{{ ecr_registry }}": {
+			"auth": "{{ ecr_token_user.stdout | b64encode }}"
+		}
+	}
+}

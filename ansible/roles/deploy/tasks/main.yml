@@ -1,0 +1,11 @@
+---
+
+- name: Login Argocd
+  shell: '/usr/local/bin/argocd login {{ argocd_host }} --skip-test-tls --grpc-web --username "{{ argocd_user }}" --password "{{ argocd_pass }}"'
+  no_log: true
+
+- name: Update param image tag api
+  shell: '/usr/local/bin/argocd app set {{ stage }}-{{ project_name }}-api -p image.tag={{ version }}'
+
+- name: Update param image tag sidekiq
+  shell: '/usr/local/bin/argocd app set {{ stage }}-{{ project_name }}-api-sidekiq -p image.tag={{ version }}'

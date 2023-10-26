@@ -1,0 +1,28 @@
+---
+
+- name: Copy dockerfile
+  template:
+    src: 'Dockerfile.j2'
+    dest: '{{ workspace }}/Dockerfile'
+    mode: 0755
+
+- name: Create AWS configuration
+  file:
+    path: '{{ item }}'
+    state: directory
+  loop:
+    - '/root/.aws'
+    - '/root/.docker'
+
+- name: Create credentials
+  template:
+    src: '{{ item }}'
+    dest: '/root/.aws/{{ item | basename | regex_replace("\.j2$", "") }}'
+  with_fileglob:
+    - '../templates/aws/*.j2'
+
+- name: Create login to ECR
+  shell: 'echo "{\"credHelpers\":{\"{{ ecr_registry }}\":\"ecr-login\"}}" > /root/.docker/config.json'
+
+- name: Build docker image
+  shell: 'kaniko --context "{{ workspace }}" --dockerfile "{{ workspace }}/Dockerfile" --destination {{ ecr_registry }}/api:latest --destination {{ ecr_registry }}/api:{{ version }}'

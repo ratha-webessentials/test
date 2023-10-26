@@ -1,0 +1,37 @@
+FROM public.ecr.aws/c6q6a5b2/api:base
+
+ARG DB_ENV_POSTGRESQL_USER=postgres
+ARG DB_ENV_POSTGRESQL_PASS=postgres
+ARG DB_PORT_5432_TCP_ADDR=postgres
+ARG DB_ENV_PGDWP_DB=postgres
+ARG DB_ENV_PGDWP_USER=postgres
+ARG DB_ENV_PGDWP_PASS=postgres
+ARG DB_ENV_PGDWP_PORT_5432_TCP_ADDR=5432
+ARG DB_ENV_PGDWP_SCHEMA_SEARCH_PATH=mpdx
+ARG SESSION_REDIS_DB_INDEX=1
+ARG SESSION_REDIS_HOST=redis
+ARG SESSION_REDIS_PORT=6379
+ARG STORAGE_REDIS_DB_INDEX=1
+ARG STORAGE_REDIS_HOST=redis
+ARG STORAGE_REDIS_PORT=6379
+ARG GOOGLE_GEOCODER_API_KEY=asdf
+ARG SECRET_KEY_BASE=asdf
+ARG WSAPI_KEY=asdf
+ARG SMTP_USER_NAME=asdf
+ARG SMTP_PASSWORD=asdf
+ARG SMTP_ADDRESS=email-smtp.us-east-1.amazonaws.com
+ARG SMTP_AUTHENTICATION=plain
+ARG SMTP_ENABLE_STARTTLS_AUTO=true
+ARG SMTP_PORT=587
+
+COPY . ./
+
+# Install build-dependencies, then install gems, subsequently removing build-dependencies
+RUN bundle install --jobs 20 --retry 2
+
+# Compile assets
+RUN bundle binstub puma sidekiq
+RUN bundle exec bootsnap precompile --gemfile app/ lib/ engines/auth/app engines/auth/lib
+RUN bundle exec rake assets:clobber assets:precompile RAILS_ENV=production
+RUN mkdir -p /home/webapp/app/tmp/cache /home/webapp/app/tmp/cache/bootsnap-compile-cache
+RUN chown -R webapp:webapp /home/webapp/
