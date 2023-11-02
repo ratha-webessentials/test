@@ -1,0 +1,13 @@
+---
+
+project_name:     'navigators'
+
+root_domain:      '{{ stage }}.partnerdev.org'
+
+e3_registry:      'e3partners.azurecr.io'
+e3_registry_auth: '{{ e3_registry_auth_vault }}'
+
+# Argocd
+argocd_host:  'cd.partnerdev.org'
+argocd_user:  'admin'
+argocd_pass:  '{{ argocd_pass_vault }}'

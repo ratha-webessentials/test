@@ -1,0 +1,21 @@
+---
+
+- name: Create docker directory
+  file:
+    path: '/github/home/.docker'
+    state: directory
+
+- name: Create credentials
+  template:
+    src: 'docker/config.json.j2'
+    dest: '/github/home/.docker/config.json'
+
+- name: Copy dockerfile
+  template:
+    src: 'Dockerfile.j2'
+    dest: '{{ workspace }}/Dockerfile'
+    mode: 0755
+
+- name: Build docker image
+  shell: 'kaniko --context "{{ workspace }}" --dockerfile "{{ workspace }}/Dockerfile" --destination {{ e3_registry }}/api:latest --destination {{ e3_registry }}/api:{{ version }}'
+
